@@ -60,9 +60,10 @@ class AdminPanelProvider extends PanelProvider
                     RolesEnum::Vendor->value,
                 ),
             ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            // ->authMiddleware([
+            //     Authenticate::class,
+            // ]);
+        ;
     }
 
     public function boot()
