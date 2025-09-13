@@ -57,15 +57,17 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // if ($user->hasAnyRole([RolesEnum::Admin->value, RolesEnum::Vendor->value])) {
-        //     return Inertia::location(route('home'));
-        // }else if($user->hasRole(RolesEnum::User)){
-        //     $route = route('dasboard', absolute:false)
-        // }
+        if ($user->hasAnyRole([RolesEnum::Admin->value, RolesEnum::Vendor->value])) {
+            return Inertia::location(route('home'));
+        } elseif ($user->hasRole(RolesEnum::User->value)) {
+            return redirect()->route('dashboard');
+        }
 
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard'));
     }
+
+
+
 
 
     /**

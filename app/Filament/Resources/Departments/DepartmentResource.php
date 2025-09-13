@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Departments;
 use App\Filament\Resources\Departments\Pages\CreateDepartment;
 use App\Filament\Resources\Departments\Pages\EditDepartment;
 use App\Filament\Resources\Departments\Pages\ListDepartments;
+use App\Filament\Resources\Departments\RelationManagers\CategoriesRelationManager;
 use App\Models\Department;
 use App\RolesEnum;
 use Filament\Actions\BulkActionGroup;
@@ -67,6 +68,7 @@ class DepartmentResource extends Resource
     {
         return [
             // Example: EmployeesRelationManager::class,
+            CategoriesRelationManager::class
         ];
     }
 
