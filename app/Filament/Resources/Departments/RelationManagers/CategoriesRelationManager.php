@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Departments\RelationManagers;
 
+use App\Models\Category;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -10,11 +11,16 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+
+use function Laravel\Prompts\select;
 
 class CategoriesRelationManager extends RelationManager
 {
@@ -22,11 +28,23 @@ class CategoriesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
+        $department = $this->getOwnerRecord();
         return $schema
             ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Select::make('parent_id')
+                    ->options(function () use ($department) {
+                        return Category::query()
+                            ->where('department_id', $department->id)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->label('parent Category')
+                    ->preload()
+                    ->searchable(),
+                Checkbox::make('active')
             ]);
     }
 
@@ -36,7 +54,13 @@ class CategoriesRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('parent.name')
+                    ->searchable()
+                    ->sortable(),
+                IconColumn::make('active')
+                    ->boolean()
             ])
             ->filters([
                 //
@@ -47,7 +71,7 @@ class CategoriesRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make(),
-                DissociateAction::make(),
+                // DissociateAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
