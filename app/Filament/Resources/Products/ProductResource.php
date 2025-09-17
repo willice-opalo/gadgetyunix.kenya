@@ -9,11 +9,13 @@ use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Tables\ProductsTable;
 use App\Models\Product;
+use App\RolesEnum;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\RichEditor;
@@ -27,6 +29,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\Builder as FormBuilder;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -108,12 +111,25 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('name')->sortable()->searchable(),
-            TextColumn::make('slug'),
-            IconColumn::make('active')->boolean(),
-            TextColumn::make('created_at')->dateTime(),
+            TextColumn::make('title')
+                ->sortable()
+                ->words(10)
+                ->searchable(),
+            TextColumn::make('status')
+                ->badge()
+                ->colors(ProductStatusEnum::colors()),
+            TextColumn::make('department.name'),
+            TextColumn::make('category.name'),
+            TextColumn::make('created_at')->dateTime()
+                ->dateTime(),
         ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->options(ProductStatusEnum::labels()),
+                SelectFilter::make('department_id')
+                    ->relationship('department', 'name')
+            ])
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
@@ -150,5 +166,12 @@ class ProductResource extends Resource
             'create' => CreateProduct::route('/create'),
             'edit' => EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Filament::auth()->user();
+
+        return $user && $user->hasRole(RolesEnum::Vendor);
     }
 }
