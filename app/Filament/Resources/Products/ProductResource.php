@@ -6,6 +6,7 @@ use App\Enums\ProductStatusEnum;
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
+use App\Filament\Resources\Products\Pages\ProductImages;
 use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Tables\ProductsTable;
 use App\Models\Product;
@@ -29,10 +30,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\Builder as FormBuilder;
+// use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Filament\Pages\Enums\SubNavigationPosition;
+// use Filament\Pages\Enums\SubNavigationPosition;
 
 // use Illuminate\Database\Eloquent\Builder;
 
@@ -41,6 +46,10 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    // protected static string $view = 'filament.resources.products.pages.product-images';
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::End;
 
     public static function form(Schema $schema): Schema
     {
@@ -162,10 +171,24 @@ class ProductResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProducts::route('/'),
-            'create' => CreateProduct::route('/create'),
-            'edit' => EditProduct::route('/{record}/edit'),
+            'index' => Pages\ListProducts::route('/'),
+            'create' => Pages\CreateProduct::route('/create'),
+            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'images' => Pages\ProductImages::route('/{record}/images')
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        // return $page->getNavigationItems([
+        //     EditProduct::class,
+        //     ProductImages::class,
+        // ]);
+
+        return $page->generateNavigationItems([
+            EditProduct::class,
+            ProductImages::class,
+        ]);
     }
 
     public static function canViewAny(): bool
